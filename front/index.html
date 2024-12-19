@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+        }
+
+        #auth-ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #444;
+            color: white;
+        }
+
+        #welcome-message {
+            margin: 0;
+        }
+
+        #logoutButton {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #logoutButton:hover {
+            background-color: #0056b3;
+        }
+
+        #movies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .movie {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .movie:hover {
+            transform: scale(1.05);
+        }
+
+        .movie img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .movie div {
+            padding: 10px;
+        }
+
+        .movie h3 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .movie p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        #add-movie-form {
+            margin: 20px auto;
+            max-width: 500px;
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #add-movie-form h2 {
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        #add-movie-form label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        #add-movie-form input, #add-movie-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        #add-movie-form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        #add-movie-form button:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            #movies {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            #add-movie-form {
+                padding: 15px;
+            }
+
+            #add-movie-form button {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Movie Library</h1>
+    </header>
+
+    <div id="auth-ui">
+        <p id="welcome-message"></p>
+        <button id="logoutButton">Logout</button>
+    </div>
+
+    <div id="movies"></div>
+
+    <div id="add-movie-form">
+        <h2>Add a New Movie</h2>
+        <form id="movieForm">
+            <label for="poster">Poster:</label>
+            <input type="file" id="poster" name="poster" required>
+
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required>
+
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <label for="director">Director:</label>
+            <input type="text" id="director" name="director" required>
+
+            <label for="main_actors">Main Actors (comma-separated):</label>
+            <input type="text" id="main_actors" name="main_actors" required>
+
+            <label for="year_of_release">Year of Release:</label>
+            <input type="number" id="year_of_release" name="year_of_release" required>
+
+            <button type="submit">Add Movie</button>
+        </form>
+    </div>
+
+    <script>
+        const API_USERS_URL = "http://127.0.0.1:8000/api/users/";
+        const API_MOVIES_URL = "http://127.0.0.1:8000/api/movies/";
+        let token = localStorage.getItem("token");
+
+        // Display welcome message if logged in
+        function updateAuthUI() {
+            const welcomeMessage = document.getElementById("welcome-message");
+            const logoutButton = document.getElementById("logoutButton");
+
+            if (token) {
+                const username = localStorage.getItem("username");
+                welcomeMessage.textContent = `Welcome, ${username}!`;
+                logoutButton.style.display = "block";
+            } else {
+                alert("You are not logged in. Redirecting to login.");
+                window.location.href = "login.html";
+            }
+        }
+
+        // Logout
+        document.getElementById("logoutButton").addEventListener("click", async () => {
+            const token = localStorage.getItem("token"); // Ensure the token is fetched here
+
+            if (!token) {
+                alert("You are not logged in.");
+                return;
+            }
+
+            const response = await fetch(`${API_USERS_URL}logout/`, {
+                method: "POST",
+                headers: { Authorization: `Token ${token}` },
+            });
+
+            if (response.ok) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("username");
+                alert("Logout successful!");
+                window.location.href = "login.html";
+            } else {
+                alert("Logout failed. Please try again.");
+            }
+        });
+
+        // Fetch and display movies
+        async function fetchMovies() {
+            const response = await fetch(API_MOVIES_URL);
+            const movies = await response.json();
+
+            const moviesDiv = document.getElementById("movies");
+            moviesDiv.innerHTML = "";
+
+            movies.forEach((movie) => {
+                const movieDiv = document.createElement("div");
+                movieDiv.className = "movie";
+                movieDiv.innerHTML = `
+                    <img src="${movie.poster}" alt="${movie.title}">
+                    <div>
+                        <h3>${movie.title}</h3>
+                        <p><strong>Description:</strong> ${movie.description}</p>
+                        <p><strong>Director:</strong> ${movie.director}</p>
+                        <p><strong>Main Actors:</strong> ${movie.main_actors}</p>
+                        <p><strong>Year of Release:</strong> ${movie.year_of_release}</p>
+                    </div>
+                `;
+                moviesDiv.appendChild(movieDiv);
+            });
+        }
+
+        // Add a new movie
+        document.getElementById("movieForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append("poster", document.getElementById("poster").files[0]);
+            formData.append("title", document.getElementById("title").value);
+            formData.append("description", document.getElementById("description").value);
+            formData.append("director", document.getElementById("director").value);
+            formData.append("main_actors", document.getElementById("main_actors").value);
+            formData.append("year_of_release", document.getElementById("year_of_release").value);
+
+            try {
+                const response = await fetch(API_MOVIES_URL, {
+                    method: "POST",
+                    headers: { Authorization: `Token ${token}` },
+                    body: formData,
+                });
+
+                if (response.ok) {
+                    alert("Movie added successfully!");
+                    fetchMovies(); // Refresh the movie list
+                } else {
+                    const errorData = await response.json();
+                    alert("Failed to add movie: " + JSON.stringify(errorData));
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred while adding the movie.");
+            }
+        });
+
+        // Initialize UI
+        updateAuthUI();
+        fetchMovies();
+    </script>
+</body>
+</html>
