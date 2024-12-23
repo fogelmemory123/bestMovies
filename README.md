@@ -7,8 +7,6 @@ pip install django
 pip install djangorestframework
 pip install django-cors-headers
 pip install Pillow
-# או לחלופין, התקן את הספריות הנדרשות מתוך requirements.txt בתיקיית back
-
 2. **הגדרת בסיס נתונים**:
 ```bash
 python manage.py makemigrations
