@@ -11,6 +11,7 @@ pip install Pillow
 
 Better alternatively, install the required libraries from the requirements.txt file located in the back folder
 ```
+2. **יצירת מסד נתונים**:
 ```bash
 python manage.py makemigrations
 python manage.py migrate
