@@ -8,6 +8,7 @@ pip install django
 pip install djangorestframework
 pip install django-cors-headers
 pip install Pillow
+
 Better alternatively, install the required libraries from the requirements.txt file located in the back folder
 ```
 ```bash
