@@ -3,11 +3,13 @@
 ## Backend - Django
 
 1. **התקנת חבילות**:
+```bash
 pip install django
 pip install djangorestframework
 pip install django-cors-headers
 pip install Pillow
-2. **הגדרת בסיס נתונים**:
+או לחלופין התקן את הספריות הנדרשות בתקייה requirements.txt בתוך תקיית back:
+```
 ```bash
 python manage.py makemigrations
 python manage.py migrate
